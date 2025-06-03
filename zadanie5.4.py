@@ -26,20 +26,11 @@ class Series(Movie):
     def __str__(self):
         return f"{self.title} S{self.season:02}E{self.episode:02}"
 
-
-def get_movies(library):
+def get_items_by_kind(library, kind_value):
     return sorted(
-        [item for item in library if isinstance(item, Movie) and not isinstance(item, Series)],
-        key=lambda m: m.title
+        [item for item in library if getattr(item, "kind", None) == kind_value],
+        key=lambda x: x.title
     )
-
-
-def get_series(library):
-    return sorted(
-        [item for item in library if isinstance(item, Series)],
-        key=lambda s: s.title
-    )
-
 
 def search(library, title):
     return [item for item in library if title.lower() in item.title.lower()]
@@ -58,9 +49,9 @@ def generate_views_multiple(library, times=10):
 
 def top_titles(library, n=3, content_type=None):
     if content_type == "movie":
-        items = get_movies(library)
+        items = get_items_by_kind(library, content_type)
     elif content_type == "series":
-        items = get_series(library)
+        items = get_items_by_kind(library, content_type)
     else:
         items = library
     return sorted(items, key=lambda x: x.plays, reverse=True)[:n]
