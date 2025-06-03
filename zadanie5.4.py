@@ -7,8 +7,9 @@ class Movie:
         self.title = title
         self.year = year
         self.genre = genre
-        self.plays = plays
         self.director = director
+        self.plays = plays
+
     def play(self, count=1):
         self.plays += count
 
@@ -16,26 +17,19 @@ class Movie:
         return f"{self.title} ({self.year})"
 
 
-
-class Series:
+class Series(Movie):
     def __init__(self, title, year, genre, season, episode, director, plays=0):
-        self.title = title
-        self.year = year
-        self.genre = genre
-        self.plays = plays
+        super().__init__(title, year, genre, director, plays)
         self.season = season
         self.episode = episode
-        self.director = director
 
     def __str__(self):
-        return f"{self.title} S{self.season:02}E{self.episode:02}, Directed by: {self.director}"
+        return f"{self.title} S{self.season:02}E{self.episode:02}"
 
-    def play(self, count=1):
-        self.plays += count
 
 def get_movies(library):
     return sorted(
-        [item for item in library if isinstance(item, Movie)],
+        [item for item in library if isinstance(item, Movie) and not isinstance(item, Series)],
         key=lambda m: m.title
     )
 
@@ -72,6 +66,15 @@ def top_titles(library, n=3, content_type=None):
     return sorted(items, key=lambda x: x.plays, reverse=True)[:n]
 
 
+
+
+def add_season(library, title, year, genre, season, episodes_count, director):
+    for ep in range(1, episodes_count + 1):
+        library.append(Series(title, year, genre, season, ep, director))
+
+def count_episodes(library, series_title):
+    return len([item for item in library if isinstance(item, Series) and item.title == series_title])
+
 if __name__ == "__main__":
     print("Biblioteka filmów.\n")
 
@@ -81,11 +84,15 @@ if __name__ == "__main__":
         Movie("The Godfather", 1972, "Crime", "Francis Ford Coppola"),
         Series("The Simpsons", 1989, "Animation", 1, 5, "James L. Brooks"),
         Series("Breaking Bad", 2008, "Drama", 2, 3, "Michelle MacLaren"),
-        Series("Stranger Things", 2016, "Horror", 3, 1, "Matthew C. Duffer"),
+        Series("Stranger Things", 2016, "Horror", 3, 1, "Matt Duffer & Ross Duffer"),
     ]
+
+    add_season(library, "The Office", 2005, "Comedy", season=1, episodes_count=6, director="Greg Daniels")
 
     generate_views_multiple(library)
 
-    print(f"Najpopularniejsze filmy i seriale dnia {datetime.now().strftime('%d.%m.%Y')}:\n")
+    today = datetime.now().strftime("%d.%m.%Y")
+    print(f"Najpopularniejsze filmy i seriale dnia {today}:\n")
+
     for item in top_titles(library, 3):
-        print(f"{item} - {item.plays} odtworzeń")
+        print(f"{item} – {item.plays} odtworzeń")
